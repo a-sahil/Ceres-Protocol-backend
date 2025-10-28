@@ -9,6 +9,8 @@ export interface IWarehouse extends Document {
   description?: string;
    price: number;
   images: string[]; // We will store URLs of the images
+    walletAddress: string; // To store the owner's crypto wallet address
+  isBooked: boolean;     // To track the booking status
 }
 
 const WarehouseSchema: Schema = new Schema({
@@ -19,6 +21,8 @@ const WarehouseSchema: Schema = new Schema({
   description: { type: String },
    price: { type: Number, required: true },
   images: [{ type: String, required: true }],
+  walletAddress: { type: String, required: true },
+  isBooked: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export default mongoose.model<IWarehouse>('Warehouse', WarehouseSchema);

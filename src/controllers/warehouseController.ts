@@ -1,15 +1,16 @@
 import { Request, Response } from 'express';
 import Warehouse from '../models/Warehouse';
 
+// --- UPDATE registerWarehouse ---
 export const registerWarehouse = async (req: Request, res: Response) => {
   try {
-    const { warehouseName, ownerName, capacity, location, description,price  } = req.body;
+    // Add walletAddress to the destructured body
+    const { warehouseName, ownerName, capacity, location, description, price, walletAddress } = req.body;
 
     if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
       return res.status(400).json({ message: 'At least one image is required.' });
     }
 
-    // Map uploaded files to their paths
     const images = (req.files as Express.Multer.File[]).map(file => file.path);
 
     const newWarehouse = new Warehouse({
@@ -20,10 +21,11 @@ export const registerWarehouse = async (req: Request, res: Response) => {
       description,
       price,
       images,
+      walletAddress, // Save the wallet address
+      isBooked: false, // Default to not booked
     });
 
     const savedWarehouse = await newWarehouse.save();
-
     res.status(201).json(savedWarehouse);
   } catch (error) {
     if (error instanceof Error) {
@@ -34,10 +36,32 @@ export const registerWarehouse = async (req: Request, res: Response) => {
   }
 };
 
-// ADD THIS NEW FUNCTION:
+// --- ADD THIS ENTIRE NEW FUNCTION ---
+// @desc    Mark a warehouse as booked
+// @route   PUT /api/warehouses/:id/book
+export const bookWarehouse = async (req: Request, res: Response) => {
+  try {
+    const warehouse = await Warehouse.findById(req.params.id);
+
+    if (warehouse) {
+      if (warehouse.isBooked) {
+        return res.status(400).json({ message: 'Warehouse is already booked' });
+      }
+
+      warehouse.isBooked = true;
+      const updatedWarehouse = await warehouse.save();
+      res.json(updatedWarehouse);
+    } else {
+      res.status(404).json({ message: 'Warehouse not found' });
+    }
+  } catch (error) {
+     res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ... keep getWarehouses and getWarehouseById as they are
 export const getWarehouses = async (req: Request, res: Response) => {
   try {
-    // Fetch all warehouses, sorted by newest first
     const warehouses = await Warehouse.find({}).sort({ createdAt: -1 });
     res.json(warehouses);
   } catch (error) {
@@ -45,7 +69,6 @@ export const getWarehouses = async (req: Request, res: Response) => {
   }
 };
 
-// ADD THIS NEW FUNCTION
 export const getWarehouseById = async (req: Request, res: Response) => {
   try {
     const warehouse = await Warehouse.findById(req.params.id);

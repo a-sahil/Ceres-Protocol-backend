@@ -1,6 +1,7 @@
 import express from 'express';
-import { getWarehouseById, getWarehouses, registerWarehouse } from '../controllers/warehouseController';
+import { bookWarehouse, getWarehouseById, getWarehouses, registerWarehouse } from '../controllers/warehouseController';
 import { uploadMultipleImages } from '../middleware/uploadMiddleware';
+import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
@@ -8,5 +9,6 @@ const router = express.Router();
 router.post('/register', uploadMultipleImages, registerWarehouse);
 router.get('/', getWarehouses);
 router.get('/:id', getWarehouseById);
+router.put('/:id/book', protect, bookWarehouse);
 
 export default router;
