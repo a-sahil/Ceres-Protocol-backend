@@ -3,7 +3,7 @@ import Warehouse from '../models/Warehouse';
 
 export const registerWarehouse = async (req: Request, res: Response) => {
   try {
-    const { warehouseName, ownerName, capacity, location, description } = req.body;
+    const { warehouseName, ownerName, capacity, location, description,price  } = req.body;
 
     if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
       return res.status(400).json({ message: 'At least one image is required.' });
@@ -18,6 +18,7 @@ export const registerWarehouse = async (req: Request, res: Response) => {
       capacity,
       location,
       description,
+      price,
       images,
     });
 
@@ -30,5 +31,32 @@ export const registerWarehouse = async (req: Request, res: Response) => {
     } else {
         res.status(500).json({ message: 'An unknown server error occurred' });
     }
+  }
+};
+
+// ADD THIS NEW FUNCTION:
+export const getWarehouses = async (req: Request, res: Response) => {
+  try {
+    // Fetch all warehouses, sorted by newest first
+    const warehouses = await Warehouse.find({}).sort({ createdAt: -1 });
+    res.json(warehouses);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error fetching warehouses' });
+  }
+};
+
+// ADD THIS NEW FUNCTION
+export const getWarehouseById = async (req: Request, res: Response) => {
+  try {
+    const warehouse = await Warehouse.findById(req.params.id);
+
+    if (warehouse) {
+      res.json(warehouse);
+    } else {
+      res.status(404).json({ message: 'Warehouse not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
   }
 };

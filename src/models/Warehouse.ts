@@ -7,6 +7,7 @@ export interface IWarehouse extends Document {
   capacity: number;
   location: string;
   description?: string;
+   price: number;
   images: string[]; // We will store URLs of the images
 }
 
@@ -16,6 +17,7 @@ const WarehouseSchema: Schema = new Schema({
   capacity: { type: Number, required: true },
   location: { type: String, required: true },
   description: { type: String },
+   price: { type: Number, required: true },
   images: [{ type: String, required: true }],
 }, { timestamps: true });
 
